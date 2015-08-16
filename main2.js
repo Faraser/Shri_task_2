@@ -18,7 +18,6 @@ function getData(url, callback) {
             {name: 'Suva', country: 'Fiji Islands'},
             {name: 'Quetzaltenango', country: 'Guatemala'},
             {name: 'Osaka', country: 'Japan'},
-            //{name: 'Tokio', country: 'Japan'},
             {name: 'Subotica', country: 'Yugoslavia'},
             {name: 'Zanzibar', country: 'Tanzania'},
         ],
@@ -48,58 +47,51 @@ function getData(url, callback) {
 var requests = ['/countries', '/cities', '/populations'];
 var responses = {};
 var query = window.prompt('Введите страну или город');
+var i,j;
 
+function makeCallback(request, query) {
+    return function (error, result) {
+        responses[request] = result;
+        var l = [];
+        for (var K in responses)
+            l.push(K);
+
+        if (l.length == 3) {
+            var cc = [], p = 0;
+
+
+            for (i = 0; i < responses['/cities'].length; i++) {
+                if (responses['/cities'][i].country === query) {
+                    cc.push(responses['/cities'][i].name);
+                }
+            }
+
+
+            for (i = 0; i < responses['/populations'].length; i++) {
+                for (j = 0; j < cc.length; j++) {
+                    if (responses['/populations'][i].name === cc[j]) {
+                        p += responses['/populations'][i].count;
+                    }
+                }
+            }
+
+            if (cc.length === 0) {
+                for (i = 0; i < responses['/populations'].length; i++) {
+                    if (responses['/populations'][i].name === query) {
+                        p += responses['/populations'][i].count;
+                    }
+                }
+            }
+
+            console.log('Total population in ' + query + ' cities: ' + p);
+        }
+    };
+}
 
 for (i = 0; i < 3; i++) {
 
     var request = requests[i];
-    function makeCallback(request, country) {
-        return function (error, result) {
-            responses[request] = result;
-            var l = [];
-            for (K in responses)
-                l.push(K);
-
-            if (l.length == 3) {
-                var c = [], cc = [], p = 0;
-                //for (i = 0; i < responses['/countries'].length; i++) {
-                //    //if (responses['/countries'][i].continent === country) {
-                //    //    c.push(responses['/countries'][i].name);
-                //    //}
-                //    c.push(responses['/countries'][i].name);
-                //}
-
-                for (i = 0; i < responses['/cities'].length; i++) {
-                    //for (j = 0; j < c.length; j++) {
-                        if (responses['/cities'][i].country === query) {
-                            cc.push(responses['/cities'][i].name);
-                        }
-                    //}
-                }
-
-
-                for (i = 0; i < responses['/populations'].length; i++) {
-                    for (j = 0; j < cc.length; j++) {
-                        if (responses['/populations'][i].name === cc[j]) {
-                            p += responses['/populations'][i].count;
-                        }
-                    }
-                }
-
-                if (cc.length === 0) {
-                    for (i = 0; i < responses['/populations'].length; i++) {
-                        if (responses['/populations'][i].name === query) {
-                            p += responses['/populations'][i].count;
-                        }
-                    }
-                }
-
-                console.log('Total population in ' + query + ' cities: ' + p);
-            }
-        };
-    }
-
     var callback = makeCallback(request, query);
 
-        getData(request, callback);
+    getData(request, callback);
 }
